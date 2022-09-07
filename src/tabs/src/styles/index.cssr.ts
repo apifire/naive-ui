@@ -323,6 +323,21 @@ export default cB('tabs', `
             `)
           ])
         ]),
+        cM('moreable', `
+          padding-left: 8px;
+          padding-right: 8px;
+          font-size: 16px;
+        `, [
+          cE('height-placeholder', `
+            width: 0;
+            font-size: var(--n-tab-font-size);
+          `),
+          cNotM('disabled', [
+            c('&:hover', `
+              color: var(--n-tab-text-color-hover);
+            `)
+          ])
+        ]),
         cM('closable', 'padding-right: 6px;'),
         cM('active', `
           border-bottom: 1px solid #0000;
