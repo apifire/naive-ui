@@ -32,9 +32,16 @@ export interface TabsInjection {
   activateTab: (panelName: string | number) => void
   handleClose: (panelName: string | number) => void
   handleAdd: () => void
+  handleMore: () => void
 }
 
 export type Addable =
+  | boolean
+  | {
+    disabled?: boolean
+  }
+
+export type Moreable =
   | boolean
   | {
     disabled?: boolean
