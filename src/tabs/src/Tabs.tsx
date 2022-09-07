@@ -16,7 +16,8 @@ import {
   watchEffect,
   ExtractPropTypes,
   cloneVNode,
-  TransitionGroup
+  TransitionGroup,
+  VNodeChild
 } from 'vue'
 import { VResizeObserver, VXScroll, VXScrollInst } from 'vueuc'
 import { throttle } from 'lodash-es'
@@ -43,7 +44,7 @@ import type {
   OnUpdateValue,
   OnUpdateValueImpl
 } from './interface'
-import { tabsInjectionKey } from './interface'
+import { Moreable, tabsInjectionKey } from './interface'
 import Tab from './Tab'
 import { tabPaneProps } from './TabPane'
 import style from './styles/index.cssr'
@@ -82,6 +83,10 @@ export const tabsProps = {
   paneClass: String,
   paneStyle: [String, Object] as PropType<string | CSSProperties>,
   addable: [Boolean, Object] as PropType<Addable>,
+  moreable: [Boolean, Object] as PropType<Addable>,
+  renderMoreIcon: [String, Number, Object, Function] as PropType<
+  string | number | VNode | (() => VNodeChild)
+  >,
   tabsPadding: {
     type: Number,
     default: 0
@@ -89,6 +94,7 @@ export const tabsProps = {
   animated: Boolean,
   onBeforeLeave: Function as PropType<OnBeforeLeave>,
   onAdd: Function as PropType<() => void>,
+  onMore: Function as PropType<() => void>,
   'onUpdate:value': [Function, Array] as PropType<MaybeArray<OnUpdateValue>>,
   onUpdateValue: [Function, Array] as PropType<MaybeArray<OnUpdateValue>>,
   onClose: [Function, Array] as PropType<MaybeArray<OnClose>>,
@@ -373,6 +379,21 @@ export default defineComponent({
     }
     const handleTabsResize = throttle(_handleTabsResize, 64)
 
+    function handleMore (): void {
+      const { onMore } = props
+      if (onMore) onMore()
+      void nextTick(() => {
+        const currentEl = getCurrentEl()
+        const { value: xScrollInst } = xScrollInstRef
+        if (!currentEl || !xScrollInst) return
+        xScrollInst.scrollTo({
+          left: currentEl.offsetLeft,
+          top: 0,
+          behavior: 'smooth'
+        })
+      })
+    }
+
     function handleAdd (): void {
       const { onAdd } = props
       if (onAdd) onAdd()
@@ -411,7 +432,8 @@ export default defineComponent({
       onBeforeLeaveRef: toRef(props, 'onBeforeLeave'),
       activateTab,
       handleClose,
-      handleAdd
+      handleAdd,
+      handleMore
     })
     onFontsReady(() => {
       updateCurrentBarStyle()
@@ -575,6 +597,8 @@ export default defineComponent({
       type,
       addTabFixed,
       addable,
+      moreable,
+      renderMoreIcon,
       mergedSize,
       renderNameListRef,
       onRender,
@@ -733,6 +757,19 @@ export default defineComponent({
                                     : tabChildren.length) !== 0
                                 )
                                 : null}
+                              {!addTabFixed && moreable && isCard
+                                ? createMoreTag(
+                                  moreable,
+                                  (showPane
+                                    ? tabPaneChildren.length
+                                    : tabChildren.length) !== 0,
+                                  renderMoreIcon as
+                                      | string
+                                      | number
+                                      | VNode
+                                      | (() => VNodeChild)
+                                )
+                                : null}
                               {mergedJustifyContent ? null : (
                                 <div
                                   class={`${mergedClsPrefix}-tabs-scroll-padding`}
@@ -778,6 +815,13 @@ export default defineComponent({
           )}
           {addTabFixed && addable && isCard
             ? createAddTag(addable, true)
+            : null}
+          {addTabFixed && moreable && isCard
+            ? createMoreTag(
+              moreable,
+              true,
+              renderMoreIcon as string | number | VNode | (() => VNodeChild)
+            )
             : null}
           {resolveWrappedSlot(
             suffixSlot,
@@ -878,6 +922,25 @@ function createAddTag (addable: Addable, internalLeftPadded: boolean): VNode {
       internalAddable
       internalLeftPadded={internalLeftPadded}
       disabled={typeof addable === 'object' && addable.disabled}
+    />
+  )
+}
+
+function createMoreTag (
+  moreable: Moreable,
+  internalLeftPadded: boolean,
+  renderMoreIcon: string | number | VNode | (() => VNodeChild)
+): VNode {
+  return (
+    <Tab
+      ref="moreTabInstRef"
+      key="__moreable"
+      name="__moreable"
+      internalCreatedByPane
+      internalMoreable
+      renderMoreIcon={renderMoreIcon}
+      internalLeftPadded={internalLeftPadded}
+      disabled={typeof moreable === 'object' && moreable.disabled}
     />
   )
 }

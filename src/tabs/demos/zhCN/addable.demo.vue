@@ -9,10 +9,13 @@
     v-model:value="value"
     type="card"
     :addable="addable"
+    moreable
     :closable="closable"
     tab-style="min-width: 80px;"
+    :render-more-icon="renderMoreIcon"
     @close="handleClose"
     @add="handleAdd"
+    @more="handleMore"
   >
     <n-tab-pane v-for="panel in panels" :key="panel" :name="panel">
       {{ panel }}
@@ -27,7 +30,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, computed } from 'vue'
+import { defineComponent, ref, computed, VNode, h } from 'vue'
 
 export default defineComponent({
   setup () {
@@ -59,6 +62,12 @@ export default defineComponent({
         if (name === valueRef.value) {
           valueRef.value = panels[Math.min(nameIndex, panels.length - 1)]
         }
+      },
+      renderMoreIcon (): VNode {
+        return h('span', {}, { default: () => '测试' })
+      },
+      handleMore (e) {
+        console.log('我进来了yo', e)
       }
     }
   }

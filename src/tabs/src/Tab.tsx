@@ -1,5 +1,15 @@
-import { h, defineComponent, inject, computed, mergeProps, Fragment } from 'vue'
-import { AddIcon } from '../../_internal/icons'
+import {
+  h,
+  defineComponent,
+  inject,
+  computed,
+  mergeProps,
+  Fragment,
+  VNode,
+  VNodeChild,
+  PropType
+} from 'vue'
+import { AddIcon, MoreIcon } from '../../_internal/icons'
 import { NBaseClose, NBaseIcon } from '../../_internal'
 import { render, omit } from '../../_utils'
 import type { ExtractPublicPropTypes } from '../../_utils'
@@ -9,6 +19,10 @@ import { tabPaneProps } from './TabPane'
 export const tabProps = {
   internalLeftPadded: Boolean,
   internalAddable: Boolean,
+  internalMoreable: Boolean,
+  renderMoreIcon: [String, Number, Object, Function] as PropType<
+  String | Number | VNode | (() => VNodeChild)
+  >,
   internalCreatedByPane: Boolean,
   ...omit(tabPaneProps, ['displayDirective'])
 } as const
@@ -31,6 +45,7 @@ export default defineComponent({
       onBeforeLeaveRef,
       triggerRef,
       handleAdd,
+      handleMore,
       activateTab,
       handleClose
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -39,6 +54,7 @@ export default defineComponent({
       trigger: triggerRef,
       mergedClosable: computed(() => {
         if (props.internalAddable) return false
+        if (props.internalMoreable) return false
         const { closable } = props
         if (closable === undefined) return closableRef.value
         return closable
@@ -56,6 +72,10 @@ export default defineComponent({
         if (props.disabled) return
         if (props.internalAddable) {
           handleAdd()
+          return
+        }
+        if (props.internalMoreable) {
+          handleMore()
           return
         }
         const { name: nameProp } = props
@@ -80,6 +100,8 @@ export default defineComponent({
   render () {
     const {
       internalAddable,
+      internalMoreable,
+      renderMoreIcon,
       clsPrefix,
       name,
       disabled,
@@ -93,7 +115,14 @@ export default defineComponent({
     } = this
     const mergedTab = label ?? tab
     return (
-      <div class={`${clsPrefix}-tabs-tab-wrapper`}>
+      <div
+        class={
+          `${clsPrefix}-tabs-tab-wrapper ` +
+          (internalMoreable || internalAddable
+            ? `${clsPrefix}-tabs-tab-wrapper-operation`
+            : `${clsPrefix}-tabs-tab-wrapper-item`)
+        }
+      >
         {this.internalLeftPadded ? (
           <div class={`${clsPrefix}-tabs-tab-pad`} />
         ) : null}
@@ -108,11 +137,12 @@ export default defineComponent({
                 value === name && `${clsPrefix}-tabs-tab--active`,
                 disabled && `${clsPrefix}-tabs-tab--disabled`,
                 mergedClosable && `${clsPrefix}-tabs-tab--closable`,
-                internalAddable && `${clsPrefix}-tabs-tab--addable`
+                internalAddable && `${clsPrefix}-tabs-tab--addable`,
+                internalMoreable && `${clsPrefix}-tabs-tab--moreable`
               ],
               onClick: trigger === 'click' ? this.activateTab : undefined,
               onMouseenter: trigger === 'hover' ? this.activateTab : undefined,
-              style: internalAddable ? undefined : style
+              style: internalAddable || internalMoreable ? undefined : style
             },
             this.internalCreatedByPane
               ? ((this.tabProps || {}) as any)
@@ -128,6 +158,24 @@ export default defineComponent({
                 <NBaseIcon clsPrefix={clsPrefix}>
                   {{
                     default: () => <AddIcon />
+                  }}
+                </NBaseIcon>
+              </>
+            ) : internalMoreable && renderMoreIcon ? (
+              <>
+                <div class={`${clsPrefix}-tabs-tab__height-placeholder`}>
+                  &nbsp;
+                </div>
+                {render(renderMoreIcon)}
+              </>
+            ) : internalMoreable ? (
+              <>
+                <div class={`${clsPrefix}-tabs-tab__height-placeholder`}>
+                  &nbsp;
+                </div>
+                <NBaseIcon clsPrefix={clsPrefix}>
+                  {{
+                    default: () => <MoreIcon />
                   }}
                 </NBaseIcon>
               </>

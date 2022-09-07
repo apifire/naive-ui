@@ -340,7 +340,9 @@ const TreeNode = defineComponent({
             nodeProps?.class
           ]}
           data-key={dataKey}
-          draggable={draggable && blockLine}
+          draggable={
+            nodeProps?.draggable ? nodeProps.draggable : draggable && blockLine
+          }
           onClick={this.handleLineClick}
           onDragstart={
             draggable && blockLine && !disabled
