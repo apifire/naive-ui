@@ -87,6 +87,9 @@ export const tabsProps = {
   renderMoreIcon: [String, Number, Object, Function] as PropType<
   string | number | VNode | (() => VNodeChild)
   >,
+  renderCloseIcon: [String, Number, Object, Function] as PropType<
+  string | number | VNode | (() => VNodeChild)
+  >,
   tabsPadding: {
     type: Number,
     default: 0
@@ -599,6 +602,7 @@ export default defineComponent({
       addable,
       moreable,
       renderMoreIcon,
+      renderCloseIcon,
       mergedSize,
       renderNameListRef,
       onRender,
@@ -712,6 +716,7 @@ export default defineComponent({
                                         <Tab
                                           {...tabPaneVNode.props}
                                           internalCreatedByPane={true}
+                                          renderCloseIcon={renderCloseIcon}
                                           internalLeftPadded={
                                             index !== 0 &&
                                             (!mergedJustifyContent ||
