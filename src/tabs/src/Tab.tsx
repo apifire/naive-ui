@@ -117,10 +117,11 @@ export default defineComponent({
     return (
       <div
         class={
-          `${clsPrefix}-tabs-tab-wrapper ` +
+          `${clsPrefix}-tabs-tab-wrapper` +
           (internalMoreable || internalAddable
-            ? `${clsPrefix}-tabs-tab-wrapper-operation`
-            : `${clsPrefix}-tabs-tab-wrapper-item`)
+            ? ` ${clsPrefix}-tabs-tab-wrapper-operation`
+            : ` ${clsPrefix}-tabs-tab-wrapper-item`) +
+          (value === name ? ` ${clsPrefix}-tabs-tab-wrapper--active` : '')
         }
       >
         {this.internalLeftPadded ? (
@@ -196,6 +197,7 @@ export default defineComponent({
             />
           ) : null}
         </div>
+        <div class={`${clsPrefix}-tabs-tab__fade`}></div>
       </div>
     )
   }
