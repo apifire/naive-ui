@@ -26,6 +26,9 @@ export const tabProps = {
   renderCloseIcon: [String, Number, Object, Function] as PropType<
   String | Number | VNode | (() => VNodeChild)
   >,
+  closeClass: [String, Function] as PropType<
+  string | ((data: String | Number) => String)
+  >,
   internalCreatedByPane: Boolean,
   ...omit(tabPaneProps, ['displayDirective'])
 } as const
@@ -106,6 +109,7 @@ export default defineComponent({
       internalMoreable,
       renderMoreIcon,
       renderCloseIcon,
+      closeClass,
       clsPrefix,
       name,
       disabled,
@@ -193,11 +197,18 @@ export default defineComponent({
             )}
           </span>
           {mergedClosable && this.type === 'card' && renderCloseIcon ? (
-            render(renderCloseIcon)
+            render(renderCloseIcon, name, this.handleClose)
           ) : mergedClosable && this.type === 'card' ? (
             <NBaseClose
               clsPrefix={clsPrefix}
-              class={`${clsPrefix}-tabs-tab__close`}
+              class={
+                `${clsPrefix}-tabs-tab__close` +
+                (typeof closeClass === 'string'
+                  ? ` ${closeClass}`
+                  : typeof closeClass === 'function'
+                    ? ' ' + (closeClass(name) as string)
+                    : '')
+              }
               onClick={this.handleClose}
               disabled={disabled}
             />

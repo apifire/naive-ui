@@ -13,6 +13,7 @@
     :closable="closable"
     tab-style="min-width: 80px;"
     :render-more-icon="renderMoreIcon"
+    :close-class="renderCloseIcon"
     @close="handleClose"
     @add="handleAdd"
     @more="handleMore"
@@ -63,10 +64,14 @@ export default defineComponent({
           valueRef.value = panels[Math.min(nameIndex, panels.length - 1)]
         }
       },
-      renderMoreIcon (): VNode {
+      renderMoreIcon (data: number | string): VNode {
         return h('span', {}, { default: () => '测试' })
       },
-      handleMore (e) {
+      renderCloseIcon (data: number | string): string {
+        console.log('--------------', data)
+        return 'ceshi'
+      },
+      handleMore (e: MouseEvent) {
         console.log('我进来了yo', e)
       }
     }
